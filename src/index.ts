@@ -15,7 +15,7 @@ app.use(express.json());
 app.use("/", express.static(path.join(import.meta.dirname, "public")));
 
 app.post("/shorten", async (req: Request, res: Response) => {
-  console.log(req.body);
+  // console.log(req.body);
   const { url, expires_at } = req.body;
   try {
     if (
@@ -30,7 +30,7 @@ app.post("/shorten", async (req: Request, res: Response) => {
       url,
       expires_at,
     ]);
-    console.log(db_res);
+    // console.log(db_res);
     if (db_res.rows[0] && db_res.rows[0].id) {
       const id = db_res.rows[0].id;
       const code = encoder.encode(id + BASE62_OFFSET);
@@ -48,7 +48,7 @@ app.post("/shorten", async (req: Request, res: Response) => {
 
 app.get("/sh/:code", async (req: Request, res: Response) => {
   const { code } = req.params;
-  console.log(code);
+  // console.log(code);
   try {
     if (code != null && typeof code == "string") {
       const sum = encoder.decode(code);
