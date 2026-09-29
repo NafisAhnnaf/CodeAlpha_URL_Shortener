@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>URL Shortener</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <div class="flex h-screen justify-center items-center bg-[#87b6a7] p-5">
+      <div
+        class="shadow-lg rounded-xl h-100 w-100 bg-[#e3f09b] flex flex-col justify-center items-center space-y-5"
+      >
+        <h1 class="text-xl text-center">
+          <i data-lucide="code-xml" class="inline text-orange-600 text-3xl"></i>
+          URL Shortener
+        </h1>
+        <div class="">
+          <form class="space-y-5 text-center" id="subForm">
+            <!-- <label for="url">Enter URL</label><br /> -->
+            <input
+              placeholder="Enter URL.."
+              class="border rounded-lg px-2"
+              name="url"
+              type="text"
+            /><br />
+            <select name="expires_at" id="expires_at">
+              <option value="1">1 hour</option>
+              <option value="12">12 hours</option>
+              <option value="24">1 day</option>
+              <option value="168">1 week</option>
+              <option value="336">2 weeks</option></select
+            ><br />
+            <button class="bg-orange-600 text-white px-2 py-1 rounded-lg">
+              Shorten
+            </button>
+          </form>
+          <div
+            id="output-area"
+            class="flex justify-center items-center space-x-1 mt-10"
+          >
+            <div id="output" class="border rounded-lg px-2">Hello</div>
+            <button
+              id="output-btn"
+              class="bg-green-600 text-white px-1 py-1 rounded-sm text-xs"
+            >
+              <i data-lucide="copy" width="16" height="16"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      console.log("Hello from Nafis");
+      document.addEventListener("DOMContentLoaded", () => {
+        lucide.createIcons();
+      });
+      const output = document.getElementById("output");
+      const outputArea = document.getElementById("output-area");
+      outputArea.style.visibility = "hidden";
+
+      const isValidHttpUrl = (string) => {
+        const pattern =
+          /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+        return pattern.test(string);
+      };
+
+      const form = document.getElementById("subForm");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const url = e.target["url"].value;
+        const expires_at = e.target["expires_at"].value;
+        console.log(url, expires_at);
+        if (!isValidHttpUrl(url)) return alert("Invalid URL");
+        const res = await fetch("/shorten", {
+          body: JSON.stringify({ url, expires_at }),
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json();
+        const shortURL = window.location.origin + "/sh/" + data.payload.code;
+        console.log(shortURL);
+        if (data.payload.code) {
+          outputArea.style.visibility = "visible";
+          output.innerText = shortURL;
+        }
+      });
+
+      const outputBtn = document.getElementById("output-btn");
+      outputBtn.addEventListener("click", async () => {
+        navigator.clipboard
+          .writeText(output.innerText)
+          .then(() => {
+            console.log("Text successfully copied to clipboard");
+            outputBtn.innerHTML = `<i data-lucide="check" width="16" height="16"></i>`;
+            lucide.createIcons();
+            setTimeout(() => {
+              outputBtn.innerHTML = `<i data-lucide="copy" width="16" height="16"></i>`;
+              lucide.createIcons();
+            }, 3000);
+          })
+          .catch((err) => {
+            console.error("Failed to copy text: ", err);
+          });
+      });
+    </script>
+  </body>
+</html>
